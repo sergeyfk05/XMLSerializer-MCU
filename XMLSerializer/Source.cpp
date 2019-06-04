@@ -1,3 +1,5 @@
+// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
+
 #include <iostream>
 #include <list>
 
@@ -90,6 +92,7 @@ public:
 	{
 		if (tagName != NULL)
 		{
+			delete[] this->tagName;
 			uint8_t buf = strlen(tagName) + 1;
 			this->tagName = (char*)malloc(buf);
 			strcpy_s(this->tagName, buf, tagName);
@@ -114,6 +117,7 @@ public:
 				delete el;
 		delete attributes;
 
+
 		delete[] tagName;
 	}
 };
@@ -132,6 +136,7 @@ class XmlParserReport
 public:
 	char* endPointer;
 	XmlElement* value;
+	bool isSucsessful = true;
 
 	operator XmlElement*()
 	{
@@ -140,17 +145,13 @@ public:
 	operator int() { return 1; }
 };
 
-static XmlElement* t(XmlParserReport* p)
-{
-	return p->value;
-}
-static XmlParserReport* ParseTag(char* pointer)
+static XmlParserReport ParseTag(char* pointer)
 {
 	bool skipSpace = true;
 	char tagName[20];
 	char attrName[20];
 	char attrValue[20];
-	XmlParserReport* result = new XmlParserReport();
+	XmlParserReport result;
 	XmlElement* value = new XmlElement();
 	ParserStatus status = None;
 
@@ -162,7 +163,8 @@ static XmlParserReport* ParseTag(char* pointer)
 		if (*pointer == '\0')
 		{
 			delete value;
-			return NULL;
+			result.isSucsessful = false;
+			return result;
 		}
 
 		if (*pointer <= 31) {
@@ -287,14 +289,16 @@ static XmlParserReport* ParseTag(char* pointer)
 				if (strncmp(pointer, tagName, buf) != 0)
 				{
 					delete value;
-					return NULL;
+					result.isSucsessful = false;
+					return result;
 				}
 
 				pointer += buf;
 				if (*pointer != '>')
 				{
 					delete value;
-					return NULL;
+					result.isSucsessful = false;
+					return result;
 				}
 
 				pointer += 1;
@@ -304,9 +308,9 @@ static XmlParserReport* ParseTag(char* pointer)
 			else
 			{
 				//throw new exception("не изменяется указатель на конец потомка");
-				XmlParserReport* report = ParseTag(pointer);
-				pointer = report->endPointer;
-				value->GetChildrens()->push_front(report->value);
+				XmlParserReport report = ParseTag(pointer);
+				pointer = report.endPointer;
+				value->GetChildrens()->push_front(report.value);
 				continue;
 			}
 		}
@@ -315,12 +319,13 @@ static XmlParserReport* ParseTag(char* pointer)
 			   
 
 		delete value;
-		return NULL;
+		result.isSucsessful = false;
+		return result;
 
 	}
 
-	result->value = value;
-	result->endPointer = pointer;
+	result.value = value;
+	result.endPointer = pointer;
 
 	return result;
 }
@@ -331,10 +336,10 @@ int main()
 	char g[] = "  <block attr1=\'ght\' attr2=\'ght2\'><block1 attr1=\'ght\' attr2=\'ght2\'/><block2 attr1=\'ght\' attr2=\'ght2\'/></block>";
 	char gg[] = "  <block> </block>";
 	system("pause");
-	XmlElement* e = t(ParseTag(g));
+	XmlElement* e = ParseTag(g);
 
-	for (uint32_t i = 0; i < 100000; i++)
-		e->GetChildrens()->push_front(t(ParseTag(gg)));
+	for (uint32_t i = 0; i < 200000; i++)
+		e->GetChildrens()->push_front(ParseTag(gg));
 
 
 	system("pause");
