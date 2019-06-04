@@ -95,7 +95,12 @@ public:
 			strcpy_s(this->tagName, buf, tagName);
 		}
 	}
-
+	char* ToString()
+	{
+		char* result;
+		throw new exception("not realized");
+		return result;
+	}
 
 	~XmlElement() {
 
@@ -122,19 +127,43 @@ enum ParserStatus {
 	ChildrensSection
 };
 
-static XmlElement* ParseTag(char* pointer)
+class XmlParserReport
+{
+public:
+	char* endPointer;
+	XmlElement* value;
+
+	operator XmlElement*()
+	{
+		return value;
+	}
+	operator int() { return 1; }
+};
+
+static XmlElement* t(XmlParserReport* p)
+{
+	return p->value;
+}
+static XmlParserReport* ParseTag(char* pointer)
 {
 	bool skipSpace = true;
 	char tagName[20];
 	char attrName[20];
 	char attrValue[20];
-	XmlElement* result = new XmlElement();
+	XmlParserReport* result = new XmlParserReport();
+	XmlElement* value = new XmlElement();
 	ParserStatus status = None;
 
 	while (true) 
 	{
 
 #pragma region SkippedChars
+
+		if (*pointer == '\0')
+		{
+			delete value;
+			return NULL;
+		}
 
 		if (*pointer <= 31) {
 			pointer++;
@@ -173,7 +202,7 @@ static XmlElement* ParseTag(char* pointer)
 		if ((status == TagName) && (*pointer == ' '))
 		{
 			status = AdditionalInfoSector;
-			result->SetName(tagName);
+			value->SetName(tagName);
 			skipSpace = true;
 			pointer++;
 			continue;
@@ -220,7 +249,7 @@ static XmlElement* ParseTag(char* pointer)
 		{
 			skipSpace = true;
 			status = AdditionalInfoSector;
-			result->GetAttributes()->push_front(new XmlAttribute(attrName, attrValue));
+			value->GetAttributes()->push_front(new XmlAttribute(attrName, attrValue));
 			pointer++;
 			continue;
 		}
@@ -231,12 +260,14 @@ static XmlElement* ParseTag(char* pointer)
 
 		if (((status == TagName) || (status == AdditionalInfoSector)) && (*pointer == '/') && (*(pointer + 1) == '>'))
 		{
+			value->SetName(tagName);
 			pointer += 2;
 			break;
 		}
 
 		if (((status == TagName) || (status == AdditionalInfoSector)) && (*pointer == '>'))
 		{
+			value->SetName(tagName);
 			skipSpace = true;
 			status = ChildrensSection;
 			pointer++;
@@ -255,25 +286,27 @@ static XmlElement* ParseTag(char* pointer)
 				uint8_t buf = strlen(tagName);
 				if (strncmp(pointer, tagName, buf) != 0)
 				{
-					delete result;
+					delete value;
 					return NULL;
 				}
 
 				pointer += buf;
 				if (*pointer != '>')
 				{
-					delete result;
+					delete value;
 					return NULL;
 				}
 
 				pointer += 1;
-				continue;
+				break;
 
 			}
 			else
 			{
-				throw new exception("не изменяется указатель на конец потомка");
-				result->GetChildrens()->push_front(ParseTag(pointer));
+				//throw new exception("не изменяется указатель на конец потомка");
+				XmlParserReport* report = ParseTag(pointer);
+				pointer = report->endPointer;
+				value->GetChildrens()->push_front(report->value);
 				continue;
 			}
 		}
@@ -281,10 +314,14 @@ static XmlElement* ParseTag(char* pointer)
 #pragma endregion
 			   
 
-		delete result;
+		delete value;
 		return NULL;
 
 	}
+
+	result->value = value;
+	result->endPointer = pointer;
+
 	return result;
 }
 
@@ -292,16 +329,12 @@ static XmlElement* ParseTag(char* pointer)
 int main()
 {
 	char g[] = "  <block attr1=\'ght\' attr2=\'ght2\'><block1 attr1=\'ght\' attr2=\'ght2\'/><block2 attr1=\'ght\' attr2=\'ght2\'/></block>";
-	char gg[] = "  <block attr1=\'ght\' />";
-	ParseTag(g);
+	char gg[] = "  <block> </block>";
 	system("pause");
-	XmlAttribute* a = new XmlAttribute(NULL, g);
-	delete a;
-	system("pause");
-	XmlElement* e = new XmlElement();
+	XmlElement* e = t(ParseTag(g));
 
 	for (uint32_t i = 0; i < 100000; i++)
-		e->GetChildrens()->push_front(ParseTag(g));
+		e->GetChildrens()->push_front(t(ParseTag(gg)));
 
 
 	system("pause");
