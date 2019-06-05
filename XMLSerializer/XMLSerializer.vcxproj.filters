@@ -13,10 +13,42 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Resource Files\XmlParser">
+      <UniqueIdentifier>{5ad14c0a-3026-495b-ba2f-93cb0c2dc3e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\XmlParser">
+      <UniqueIdentifier>{25ccdad3-f77c-4a0c-8fa9-fb4ed8dc6bb2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="XmlAttribute.cpp">
+      <Filter>Resource Files\XmlParser</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlElement.cpp">
+      <Filter>Resource Files\XmlParser</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlParserReport.cpp">
+      <Filter>Resource Files\XmlParser</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlParser.cpp">
+      <Filter>Resource Files\XmlParser</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="XmlAttribute.h">
+      <Filter>Header Files\XmlParser</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlElement.h">
+      <Filter>Header Files\XmlParser</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlParserReport.h">
+      <Filter>Header Files\XmlParser</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlParser.h">
+      <Filter>Header Files\XmlParser</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
